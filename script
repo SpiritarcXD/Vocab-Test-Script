@@ -1,0 +1,86 @@
+import random
+import threading
+import time
+
+# Event flag to signal the background thread to stop
+stop_keepalive = threading.Event()
+
+def keep_alive_loop(interval=3):
+    """Prints a keep-alive marker periodically until signaled to stop."""
+    while not stop_keepalive.is_set():
+        # Wait for the interval or until the stop event is set
+        if stop_keepalive.wait(timeout=interval):
+            break
+        # Print a subtle heartbeat to keep stdout active without flooding
+        print(".", end="", flush=True)
+
+vocab_theme_1a = {
+    "culturelle diversity": "la diversité culturelle",
+    "French-speaking/francophone countries": "la francophonie",
+    "a francophile (French-loving person)": "un(e) francophile",
+    "a French-speaking person": "un(e) francophone",
+    "fluently": "couramment",
+    "International Organisation of la francophonie": "l'Organisation internationale de la Francophonie (OIF)",
+    "culture": "la culture",
+    "globalization": "la mondialisation",
+    "identity": "l'identité",
+    "a foreign country": "un pays à l'étranger",
+    "International Day of la Francophonie": "la Journée Internationale de la Francophonie",
+    "a member country": "un pays membre",
+    "a continent": "un continent",
+    "a mandate": "un mandat (une mission confiée)",
+    "Les Jeux de la Francophonie": "Les Jeux de la Francophonie",
+    "a link / connection / relationship": "un lien",
+    "a link / connection / relationship / relation": "un rapport",
+    "to share": "partager",
+    "to celebrate": "célébrer",
+    "to represent": "représenter",
+    "to belong to": "appartenir",
+    "valuing / promoting the French language": "la valorisation de la langue française",
+    "a respectful world": "un monde respectueux",
+    "solidarity": "la solidarité",
+    "a united international community": "une communauté internationale solidaire",
+    "the sharing of experiences": "l'échange des expériences",
+    "the dialogue of cultures": "le dialogue des cultures",
+    "the culture of dialogue": "la culture du dialogue",
+    "strategic missions": "les missions stratégiques",
+    "the influence of the French language": "le rayonnement de la langue française",
+    "a people / population": "un peuple",
+    "mutual understanding / appreciation / awareness / knowledge": "la connaissance mutuelle",
+    "rise / development": "l'essor",
+    "reinforcement / strengthening": "le renforcement",
+    "promotion": "la promotion",
+    "functioning / operation / working": "le fonctionnement",
+    "an agreement / permission / consent": "un accord",
+    "collaboration": "la collaboration",
+    "cooperation": "la coopération",
+    "concerns / problems / worries / business": "les affaires",
+    "peace": "la paix",
+    "equality": "l'égalité",
+    "démocratie": "la démocratie",
+}
+
+while True:
+    items = list(vocab_theme_1a.items())
+    random.shuffle(items)
+    
+    for i, (english, french) in enumerate(items, 1):
+        # Reset and start the keep-alive thread
+        stop_keepalive.clear()
+        heartbeat = threading.Thread(target=keep_alive_loop, daemon=True)
+        heartbeat.start()
+        
+        start_time = time.perf_counter()
+        
+        # Blocking user input call
+        input(f"[{i}/{len(items)}] English: {english}\n     <Press Enter to reveal = > ")
+        
+        elapsed_time = time.perf_counter() - start_time
+        
+        # Stop the background thread immediately after user presses Enter
+        stop_keepalive.set()
+        heartbeat.join()
+        
+        print(f"\n     ---> French:  {french}")
+        print(f"You took {elapsed_time:.3f} seconds.")
+        print("-" * 50)
